@@ -1,0 +1,19 @@
+body {margin:0}
+hr {color:teal}
+header {background-color:teal}
+header {font-family: Geneva, Arial, Helvetica, sans-serif; text-decoration-line:none}
+.company {
+color:white; font-size:20pt; position:relative; left:5px;padding-left:30px
+}
+.about_company {color:white; font-size:15pt; position:relative; left:40px; text-decoration-line:none}
+.service {color:white; font-size:15pt; position:relative; left:60px; text-decoration-line:none}
+.goods {color:white; font-size:15pt; position:relative; left:80px; text-decoration-line:none}
+.news {color:white; font-size:15pt; position:relative; left:100px; text-decoration-line:none}
+.comments {color:white; font-size:15pt; position:relative; left:120px; text-decoration-line:none}
+.contacts {color:white; font-size:15pt; position:relative; left:140px; text-decoration-line:none}
+.about_company:hover {color:rgb(0,255,170)}
+.service:hover {color:rgb(0,255,170)}
+.goods:hover {color:rgb(0,255,170)}
+.news:hover {color:rgb(0,255,170)}
+.comments:hover {color:rgb(0,255,170)}
+.contacts:hover {color:rgb(0,255,170)}
