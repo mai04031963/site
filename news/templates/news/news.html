@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Новости компании</title>
+</head>
+{% include 'base.html' %}
+<body>
+    <ul>
+        {% for news in news_list %}
+            <li>
+                {{ news.id }} <br>
+                {{ news.news_date }} <br>
+                {{ news.news_text }}
+            </li>
+        {% empty %}
+             <li>
+                 пока нет новостей
+             </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
