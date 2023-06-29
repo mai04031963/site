@@ -9,6 +9,7 @@ class Comments(models.Model):
     comment_date = models.DateField(auto_now_add=True)
     comment_text = models.TextField(blank=True)
     comment_sign = models.CharField(max_length=100, blank=True)
+    comment_contact = models.CharField(max_length=100, blank=True)
     answer_for_comment = models.TextField(blank=True)
     answer_sign = models.CharField(max_length=100, blank=True)
 

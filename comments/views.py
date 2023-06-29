@@ -1,31 +1,19 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, redirect
 # from django.http import HttpResponse
 # from django.template import loader
 from . models import Comments
 from django.http import Http404
-from django.views.generic import ListView
+from django.views.generic import ListView, CreateView
 from datetime import date
-
-
-# Create your views here.
-#def comments_(request):
-#    comments_list = Comments.objects.get(pk=2)
-#    context = {"id": comments_list.id,
-#               "comment_date": comments_list.comment_date,
-#               "comment_text": comments_list.comment_date,
-#               "comment_sign": comments_list.comment_sign,
-#               "answer_for_comment": comments_list.answer_for_comment
-#               }
-#    print(context)
-#    print(comments_list.id, comments_list.comment_date, comments_list.comment_text,
-#          comments_list.comment_sign, comments_list.answer_for_comment)
-#    return render(request, "comments/comments.html", context)
-
+from django import forms
+from django.urls import reverse
+from django.http import HttpResponse, HttpResponseRedirect
+from . forms import CommentForm, example
+from random import random, choice
 
 class CommentsListView(ListView):
     model = Comments
     template_name = "comments/comments.html"
-    #queryset = Comments.objects.all().order_by("-comment_date")
     paginate_by = 5
     allow_empty = True
 
@@ -38,3 +26,22 @@ class CommentsListView(ListView):
 
     def get_queryset(self):
         return Comments.objects.all().order_by("-comment_date")
+
+
+def new_comment(request):
+
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            form.save()
+            form.clean()
+            return redirect('../')
+        else:
+            context = {'form': form}
+            return render(request, 'comments/new_comment.html', context)
+    else:
+        form = CommentForm()
+        context = {'form': form}
+        return render(request, 'comments/new_comment.html', context)
+
+
