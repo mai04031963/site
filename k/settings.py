@@ -43,8 +43,8 @@ INSTALLED_APPS = [
     'goods.apps.GoodsConfig',
     'news.apps.NewsConfig',
     'first_page.apps.FirstPageConfig',
-    'comments.apps.CommentsConfig'
-
+    'comments.apps.CommentsConfig',
+    'service.apps.ServiceConfig'
 ]
 
 MIDDLEWARE = [
@@ -111,11 +111,16 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'ru-ru'
+LANGUAGE_CODE = 'ru-Ru'
+
+LANGUAGES = (
+    ('ru', 'Russian'),
+    ('en', 'English'),
+)
+
+USE_I18N = True  # активация системы перевода django
 
 TIME_ZONE = 'Europe/Moscow'
-
-USE_I18N = True
 
 USE_TZ = True
 
