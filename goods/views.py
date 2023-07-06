@@ -3,11 +3,12 @@ from django.http import HttpResponse
 # from django.template import loader
 from . models import Good, Category
 from django.http import Http404
+from . forms import GoodsForm
 
 def index(request):
-    goods_list = Good.objects.all()
-    context = {"goods_list": goods_list, }
-    return render(request, "goods/index.html", context)
+    form = GoodsForm()
+    context = {'form': form}
+    return render(request, "goods/cat1.html", context)
 
 
 def detail(request, _id):
