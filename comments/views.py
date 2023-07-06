@@ -1,15 +1,8 @@
-from django.shortcuts import render, get_object_or_404, redirect
-# from django.http import HttpResponse
-# from django.template import loader
+from django.shortcuts import render, redirect
 from . models import Comments
-from django.http import Http404
 from django.views.generic import ListView, CreateView
-from datetime import date
-from django import forms
-from django.urls import reverse
-from django.http import HttpResponse, HttpResponseRedirect
-from . forms import CommentForm, example
-from random import random, choice
+from . forms import CommentForm, CommentForm2
+
 
 class CommentsListView(ListView):
     model = Comments
@@ -25,7 +18,7 @@ class CommentsListView(ListView):
         return context
 
     def get_queryset(self):
-        return Comments.objects.all().order_by("-comment_date")
+        return Comments.objects.all().order_by("-id", "-comment_date")
 
 
 def new_comment(request):
@@ -45,3 +38,17 @@ def new_comment(request):
         return render(request, 'comments/new_comment.html', context)
 
 
+def new_comment2(request):
+
+    if request.method == 'POST':
+        form = CommentForm2(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('../')
+        else:
+            context = {'form': form}
+            return render(request, 'comments/new_comment2.html', context)
+    else:
+        form = CommentForm2()
+        context = {'form': form}
+        return render(request, 'comments/new_comment2.html', context)
