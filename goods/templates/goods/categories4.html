@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Товары</title>
+</head>
+<body>
+    <header>
+        {% include 'base.html' %}
+        {% load static %}
+        <link rel="stylesheet" type="text/css" href="{% static '/goods/categories2.css' %}">
+    </header>
+    <form action="" method="post">
+        {% csrf_token %}
+        <p id="search"> {{ form.how_to_search }} {{ form.how_to_search.label }} {{ form.search }}
+            <input type="submit" value="Найти">
+        </p>
+    <p id="cat">
+        Категории товаров:
+    </p>
+<ul class="categories1">
+    {% for id, name in cat1 %}
+        <li>
+            <a href="{% url 'catalogs' %}{{ id }}/" class="cat1"> {{ name }} </a>
+                {% with code=id %}
+                {% for id, name, cat1 in cat2 %}
+                {% if   cat1 == code  %}
+                <ul>
+                    <li>
+                        <a href="{% url 'catalogs' %}{{ cat1 }}/{{ id }}/"> {{ name }} </a>
+                    </li>
+                </ul>
+                {% endif %}
+                {% endfor %}
+                {% endwith %}
+        </li>
+    {% empty %}
+    <li>
+        пока нет категорий
+    </li>
+    {% endfor %}
+</ul>
+<ul class="good">
+    {% for id, name, article, catalog_number, cat1, cat2, cat3 in goods %}
+    <li id="g">
+        {{ name }}
+    </li>
+    {% empty %}
+    <li>
+        выберите категорию товаров
+    </li>
+    {% endfor %}
+</ul>
+    </form>
+</body>

@@ -1,0 +1,14 @@
+<p>
+    Категории товаров:<br>
+</p>
+<ul>
+    {% for id, name in cat1 %}
+            <li>
+                <a href="{{ id }}/"> {{ name }} </a>
+            </li>
+        {% empty %}
+             <li>
+                 пока нет категорий
+             </li>
+        {% endfor %}
+</ul>

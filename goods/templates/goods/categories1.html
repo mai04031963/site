@@ -1,0 +1,39 @@
+<p>
+    Категории товаров:<br>
+</p>
+<ul>
+    {% for id, name in cat1 %}
+            <li>
+                <a href="{% url 'catalogs' %}{{ id }}/"> {{ name }} </a>
+            </li>
+        {% empty %}
+             <li>
+                 пока нет категорий
+             </li>
+        {% endfor %}
+</ul>
+<p>
+    Разделы товаров:<br>
+</p>
+<ul>
+    {% for id, name, cat1 in cat2 %}
+            <li>
+                <a href="{{ id }}/"> {{ name }} </a>
+            </li>
+        {% empty %}
+             <li>
+                 выберите категорию
+             </li>
+        {% endfor %}
+</ul>
+<ul>
+        {% for id, name, article, catalog_number, cat1, cat2, cat3 in goods %}
+            <li>
+                {{ name }}
+            </li>
+        {% empty %}
+             <li>
+                 пока нет товаров
+             </li>
+        {% endfor %}
+</ul>
