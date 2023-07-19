@@ -15,3 +15,11 @@ class Demands(models.Model):
     demand_fio = models.CharField(blank=True, max_length=50, name="demand_fio", verbose_name="Имя")
     demand_email = models.CharField(blank=True, max_length=50, name="demand_email", verbose_name="e-mail")
     demand_in_base = models.BooleanField(auto_created=True, default=False, name="demand_in_base", verbose_name="Занесено в базу данных")
+
+    def __str__(self):
+        return str(self.demand_date)
+
+    class Meta:
+        verbose_name_plural = "Заявки"
+        verbose_name = "Заявка"
+        ordering = ['-demand_date']
