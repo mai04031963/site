@@ -5,22 +5,21 @@ from django.db import models
 class Category(models.Model):
     id = models.BigIntegerField(primary_key=True)
     name = models.CharField(null=True, max_length=255, verbose_name='Товар')
-    cat_level = models.IntegerField(null=True, default=0, verbose_name="Уровень вложенности категории товаров")
-    #cat1 = models.BigIntegerField(default=0, blank=False, verbose_name='id раздела 1-ого уровня')
-    #cat2 = models.BigIntegerField(default=0, blank=False, verbose_name='id раздела 2-ого уровня')
-    #cat3 = models.BigIntegerField(default=0, blank=False, verbose_name='id раздела 3-ого уровня')
-    row_index = models.BigIntegerField(default=0, blank=True, verbose_name='Порядковый номер')
+    #cat_level = models.IntegerField(null=True, default=0, verbose_name="Уровень вложенности категории товаров")
+    #row_index = models.IntegerField(null=True, default=0, verbose_name='Порядковый номер')
+    # cat1 = models.BigIntegerField(default=0, blank=False, verbose_name='id раздела 1-ого уровня')
+    # cat2 = models.BigIntegerField(default=0, blank=False, verbose_name='id раздела 2-ого уровня')
+    # cat3 = models.BigIntegerField(default=0, blank=False, verbose_name='id раздела 3-ого уровня')
 
-    def __str__(self):
-        return self.name
+    #def __str__(self):
+    #    return self.name
 
-    class Meta:
-        verbose_name_plural = "Категории товаров"
-        verbose_name = "Категория товаров"
+    #class Meta:
+    #    verbose_name_plural = "Категории товаров"
+    #    verbose_name = "Категория товаров"
 
 
 class Good(models.Model):
-    id = models.BigIntegerField(primary_key=True)
     name = models.CharField(null=True, max_length=255, verbose_name='Товар')          # наименование товара (раздела)
     article = models.CharField(null=True, max_length=20, blank=True, verbose_name='Артикул') # артикул
     catalog_number = models.CharField(null=True, max_length=20, blank=True, verbose_name='Каталожный номер') # КАТАЛОЖНЫЙ НОМЕР
