@@ -41,11 +41,21 @@ def good_search(request, _id1=None, _id2=None, _id3=None, search=None):
         if form.is_valid():
             how_to_search = form.cleaned_data['how_to_search']
             search = form.cleaned_data['search']
+            # обработка строки поиска
+            a = [s.strip() for s in search.split(" ")]
+            if len(a) == 0:
+                search = ''
+            elif len(a) == 1:
+                search = a[0]
+            else:
+                search = a[0]
+                for i in range(1, len(a)):
+                    search = search + '.+' + a[i]
             # обработка, когда не выбраны категории товаров
             if _id1 is None and _id2 is None and _id3 is None:
                 cat1 = Good.objects.values_list('id', 'name').filter(is_good=False, cat1=0, cat2=0, cat3=0).order_by('name')
                 goods = Good.objects.values_list('id', 'name', 'article', 'catalog_number', 'cat1', 'cat2',
-                                    'cat3').filter(is_good=True,  name__icontains=search).order_by('name')
+                                    'cat3').filter(is_good=True,  name__iregex=search).order_by('name')
 
                 # постраничный вывод
                 paginator = Paginator(goods, 100)
@@ -64,10 +74,10 @@ def good_search(request, _id1=None, _id2=None, _id3=None, search=None):
                                                                          cat3=0).order_by('name')
                 if how_to_search:
                     goods = Good.objects.values_list('id', 'name', 'article', 'catalog_number', 'cat1', 'cat2', 'cat3').filter(
-                        is_good=True, name__icontains=search).order_by('name')
+                        is_good=True, name__iregex=search).order_by('name')
                 else:
                     goods = Good.objects.values_list('id', 'name', 'article', 'catalog_number', 'cat1', 'cat2',
-                                                     'cat3').filter(is_good=True, cat1=_id1, name__icontains=search).order_by('name')
+                                                     'cat3').filter(is_good=True, cat1=_id1, name__iregex=search).order_by('name')
                 # постраничный вывод
                 paginator = Paginator(goods, 100)
                 if 'page' in request.GET:
@@ -89,10 +99,10 @@ def good_search(request, _id1=None, _id2=None, _id3=None, search=None):
                                                                                      cat3=0).order_by('name')
                 if how_to_search:
                     goods = Good.objects.values_list('id', 'name', 'article', 'catalog_number', 'cat1', 'cat2',
-                                    'cat3').filter(is_good=True, name__icontains=search).order_by('name')
+                                    'cat3').filter(is_good=True, name__iregex=search).order_by('name')
                 else:
                     goods = Good.objects.values_list('id', 'name', 'article', 'catalog_number', 'cat1', 'cat2',
-                                                     'cat3').filter(is_good=True, cat1=_id1, cat2=_id2, name__icontains=search).order_by('name')
+                                                     'cat3').filter(is_good=True, cat1=_id1, cat2=_id2, name__iregex=search).order_by('name')
                 # постраничный вывод
                 paginator = Paginator(goods, 100)
                 if 'page' in request.GET:
@@ -116,11 +126,11 @@ def good_search(request, _id1=None, _id2=None, _id3=None, search=None):
                 if how_to_search:
                     goods = Good.objects.values_list('id', 'name', 'article', 'catalog_number', 'cat1', 'cat2',
                                                  'cat3').filter(
-                                is_good=True, name__icontains=search).order_by('name')
+                                is_good=True, name__iregex=search).order_by('name')
                 else:
                     goods = Good.objects.values_list('id', 'name', 'article', 'catalog_number', 'cat1', 'cat2',
                                                      'cat3').filter(
-                        is_good=True, cat1=_id1, cat2=_id2, cat3=_id3, name__icontains=search).order_by('name')
+                        is_good=True, cat1=_id1, cat2=_id2, cat3=_id3, name__iregex=search).order_by('name')
                 # постраничный вывод
                 paginator = Paginator(goods, 100)
                 if 'page' in request.GET:

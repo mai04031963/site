@@ -28,6 +28,17 @@
                 <ul>
                     <li>
                         <a href="{% url 'catalogs' %}{{ cat1 }}/{{ id }}/"> {{ name }} </a>
+                        {% with code2=id %}
+                        {% for id, name, cat1, cat2 in cat3 %}
+                        {% if cat2 == code2 %}
+                        <ul>
+                            <li>
+                                <a href="{% url 'catalogs' %}{{ cat1 }}/{{ cat2 }}/{{ id }}/"> {{ name }}</a>
+                            </li>
+                        </ul>
+                        {% endif %}
+                        {% endfor %}
+                        {% endwith %}
                     </li>
                 </ul>
                 {% endif %}
