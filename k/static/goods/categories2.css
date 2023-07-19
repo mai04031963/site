@@ -4,5 +4,6 @@ p#search {position: relative; left: 60px}
 p#cat {position: relative; left: 40px}
 .categories1 {left: 10px; top: 100px; list-style-type: none; width: 250px}
 .categories2 {left: 100px; top: 100px; list-style-type: none; width: 250px}
+.pagination {position: absolute; left: 450px; top: 130px}
 .good {position: absolute; left: 400px; top: 150px; list-style-type: none}
 li#g {margin-bottom: 1em; width: 500px}
