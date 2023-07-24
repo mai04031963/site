@@ -10,8 +10,8 @@
         {% load static %}
         <link rel="stylesheet" type="text/css" href="{% static '/goods/categories2.css' %}">
     </header>
-    <form action="" method="post">
-        {% csrf_token %}
+    <form action="" method="get">
+        {# {% csrf_token %} #}
         <p id="search"> {{ form.how_to_search }} {{ form.how_to_search.label }} {{ form.search }}
             <input type="submit" value="Найти">
         </p>
@@ -52,10 +52,11 @@
     {% endfor %}
 </ul>
         <div class="pagination">
+
             <span class="step-links">
                 {% if page.has_previous %}
-                <a href="?page=1">&laquo; первая</a>
-                <a href="?page={{ page.previous_page_number }}">предыдущая</a>
+                <a href="{{ pa }}page=1">&laquo; первая</a>
+                <a href="{{ pa }}page={{ page.previous_page_number }}">предыдущая</a>
                 {% endif %}
 
             <span class="current">
@@ -63,11 +64,14 @@
             </span>
 
                 {% if page.has_next %}
-                <a href="?page={{ page.next_page_number }}">следующая</a>
-                <a href="?page={{ page.paginator.num_pages }}">последняя &raquo;</a>
+                <a href="{{ pa }}page={{ page.next_page_number }}">следующая</a>
+                <a href="{{ pa }}page={{ page.paginator.num_pages }}">последняя &raquo;</a>
                 {% endif %}
             </span>
         </div>
+
+
+
 <ul class="good">
     {% for id, name, article, catalog_number, cat1, cat2, cat3 in page.object_list %}
     <li id="g">
@@ -79,5 +83,14 @@
     </li>
     {% endfor %}
 </ul>
+
+        <div class="aside">
+        Публикуемый ассортимент не является полным перечнем товаров, поставлямых нашей компанией.
+        Некоторые товары могут быть
+        Для получения информации по наличию и срокам поставки звоните по телефонам: 75-24-29, 75-24-30,
+        telegram.... Для лучшего поиска товаров в окне поиска можно набрать, например: хол роз лев для поиска
+        холодильника "Розовый лев", или кар HP 1010 для поиска картриджа HP LaserJet 1010.
+        </div>
+
     </form>
 </body>

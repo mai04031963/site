@@ -1,5 +1,5 @@
-from django.shortcuts import render, redirect, Http404
-from . models import Good, Category
+from django.shortcuts import render, redirect
+from . models import Good
 from django.http import Http404
 from django.core.paginator import Paginator
 from django.views.generic import ListView
@@ -33,51 +33,38 @@ def detail(request, _id):
     return render(request, "goods/detail.html", {"good": good.name, "id": good.id, "description": good.description})
 
 
-def good_search(request, _id1=None, _id2=None, _id3=None, search=None):
+def good_search2(request, _id1=None, _id2=None, _id3=None, how_to_search=None, search=None):
 
     # обработка запроса поиска товара
-    if request.method == 'POST':
-        form = GoodsForm(request.POST)
-        if form.is_valid():
-            how_to_search = form.cleaned_data['how_to_search']
-            search = form.cleaned_data['search']
-            # обработка строки поиска
-            a = [s.strip() for s in search.split(" ")]
-            if len(a) == 0:
-                search = ''
-            elif len(a) == 1:
-                search = a[0]
+    if request.method == 'GET':
+        form = GoodsForm(request.GET)
+        # определение наличия поиска
+        if 'how_to_search' in request.GET.keys():
+            how_to_search = request.GET.get('how_to_search')
+            GoodsForm.how_to_search = how_to_search
+        if 'search' in request.GET.keys():
+            search = request.GET.get('search')
+            GoodsForm.search = search
+            a = search.replace(' ', '.+.')
+
+            # вывод найденного товара
+            # определение пути для правильной пагинации в найденном списке товаров
+            n = request.META['QUERY_STRING'].find('&page')
+            if n == -1:
+                pa = '?' + request.META['QUERY_STRING'] + '&'
             else:
-                search = a[0]
-                for i in range(1, len(a)):
-                    search = search + '.+' + a[i]
-            # обработка, когда не выбраны категории товаров
+                pa = '?' + request.META['QUERY_STRING'][:n] + '&'
+
+            # вывод найденных товаров без выбора категорий товаров
             if _id1 is None and _id2 is None and _id3 is None:
-                cat1 = Good.objects.values_list('id', 'name').filter(is_good=False, cat1=0, cat2=0, cat3=0).order_by('name')
-                goods = Good.objects.values_list('id', 'name', 'article', 'catalog_number', 'cat1', 'cat2',
-                                    'cat3').filter(is_good=True,  name__iregex=search).order_by('name')
-
-                # постраничный вывод
-                paginator = Paginator(goods, 100)
-                if 'page' in request.GET:
-                    page_num = request.GET['page']
-                else:
-                    page_num = 1
-                page = paginator.get_page(page_num)
-
-                context = {'form': form, 'cat1': cat1, 'page': page, 'goods': page.object_list}
-                return render(request, "goods/categories4.html", context)
-            # обработка, когда выбран раздел 1-ого уровня
-            elif _id1 is not None and _id2 is None and _id3 is None:
-                cat1 = Good.objects.values_list('id', 'name').filter(is_good=False, cat1=0, cat2=0, cat3=0).order_by('name')
-                cat2 = Good.objects.values_list('id', 'name', 'cat1').filter(is_good=False, cat1=_id1, cat2=0,
-                                                                         cat3=0).order_by('name')
+                cat1 = Good.objects.values_list('id', 'name').filter(is_good=False, cat1=0, cat2=0,
+                                                                     cat3=0).order_by('name')
                 if how_to_search:
-                    goods = Good.objects.values_list('id', 'name', 'article', 'catalog_number', 'cat1', 'cat2', 'cat3').filter(
-                        is_good=True, name__iregex=search).order_by('name')
+                    goods = Good.objects.values_list('id', 'name', 'article', 'catalog_number', 'cat1', 'cat2',
+                                                     'cat3').filter(is_good=True, name__iregex=a).order_by('name')
                 else:
                     goods = Good.objects.values_list('id', 'name', 'article', 'catalog_number', 'cat1', 'cat2',
-                                                     'cat3').filter(is_good=True, cat1=_id1, name__iregex=search).order_by('name')
+                                                     'cat3').filter(is_good=True, name__iregex=a).order_by('name')
                 # постраничный вывод
                 paginator = Paginator(goods, 100)
                 if 'page' in request.GET:
@@ -85,24 +72,51 @@ def good_search(request, _id1=None, _id2=None, _id3=None, search=None):
                 else:
                     page_num = 1
                 page = paginator.get_page(page_num)
-
-                context = {'form': form, 'cat1': cat1, 'cat2': cat2, 'page': page, 'goods': page.object_list}
+                # определение контекста
+                context = {'form': form, 'cat1': cat1, 'page': page, 'goods': page.object_list, 'pa': pa}
                 return render(request, "goods/categories4.html", context)
-            # обработка, когда выбран раздел 2-ого уровня
+
+            # вывод найденных товаров при выборе раздела 1-ого уровня
+            elif _id1 is not None and _id2 is None and _id3 is None:
+
+                cat1 = Good.objects.values_list('id', 'name').filter(is_good=False, cat1=0, cat2=0, cat3=0).order_by(
+                                                                     'name')
+                cat2 = Good.objects.values_list('id', 'name', 'cat1').filter(is_good=False, cat1=_id1, cat2=0,
+                                                                             cat3=0).order_by('name')
+                if how_to_search:
+                    goods = Good.objects.values_list('id', 'name', 'article', 'catalog_number', 'cat1', 'cat2',
+                                                     'cat3').filter(is_good=True, name__iregex=a).order_by('name')
+                else:
+                    goods = Good.objects.values_list('id', 'name', 'article', 'catalog_number', 'cat1', 'cat2',
+                                                     'cat3').filter(is_good=True, cat1=_id1, name__iregex=a).order_by('name')
+                # постраничный вывод
+                paginator = Paginator(goods, 100)
+                if 'page' in request.GET:
+                    page_num = request.GET['page']
+                else:
+                    page_num = 1
+                page = paginator.get_page(page_num)
+                # определение контекста
+                context = {'form': form, 'cat1': cat1, 'cat2': cat2, 'page': page, 'goods': page.object_list, 'pa': pa}
+                return render(request, "goods/categories4.html", context)
+
+            # вывод найденных товаров при выборе раздела 2-ого уровня
             elif _id1 is not None and _id2 is not None and _id3 is None:
                 cat1 = Good.objects.values_list('id', 'name').filter(is_good=False, cat1=0, cat2=0, cat3=0).order_by(
                     'name')
                 cat2 = Good.objects.values_list('id', 'name', 'cat1').filter(is_good=False, cat1=_id1, cat2=0,
-                                                                             cat3=0).order_by('name')
+                                                                             cat3=0).order_by(
+                    'name')
                 cat3 = Good.objects.values_list('id', 'name', 'cat1', 'cat2').filter(is_good=False, cat1=_id1,
                                                                                      cat2=_id2,
                                                                                      cat3=0).order_by('name')
                 if how_to_search:
                     goods = Good.objects.values_list('id', 'name', 'article', 'catalog_number', 'cat1', 'cat2',
-                                    'cat3').filter(is_good=True, name__iregex=search).order_by('name')
+                                                     'cat3').filter(is_good=True, name__iregex=a).order_by('name')
                 else:
                     goods = Good.objects.values_list('id', 'name', 'article', 'catalog_number', 'cat1', 'cat2',
-                                                     'cat3').filter(is_good=True, cat1=_id1, cat2=_id2, name__iregex=search).order_by('name')
+                                                     'cat3').filter(is_good=True, cat1=_id1, cat2=_id2, name__iregex=a).order_by('name')
+
                 # постраничный вывод
                 paginator = Paginator(goods, 100)
                 if 'page' in request.GET:
@@ -111,9 +125,10 @@ def good_search(request, _id1=None, _id2=None, _id3=None, search=None):
                     page_num = 1
                 page = paginator.get_page(page_num)
 
-                context = {'form': form, 'cat1': cat1, 'cat2': cat2, 'cat3': cat3, 'page': page, 'goods': page.object_list}
+                context = {'form': form, 'cat1': cat1, 'cat2': cat2, 'cat3': cat3, 'page': page,
+                           'goods': page.object_list, 'pa': pa}
                 return render(request, "goods/categories4.html", context)
-            # обработка, когда выбран раздел 3-его уровня
+            # вывод найденных товаров при выборе раздела 3-его уровня
             elif _id1 is not None and _id2 is not None and _id3 is not None:
                 cat1 = Good.objects.values_list('id', 'name').filter(is_good=False, cat1=0, cat2=0, cat3=0).order_by(
                     'name')
@@ -125,12 +140,12 @@ def good_search(request, _id1=None, _id2=None, _id3=None, search=None):
                                                                                      cat3=0).order_by('name')
                 if how_to_search:
                     goods = Good.objects.values_list('id', 'name', 'article', 'catalog_number', 'cat1', 'cat2',
-                                                 'cat3').filter(
-                                is_good=True, name__iregex=search).order_by('name')
+                                                     'cat3').filter(is_good=True, name__iregex=a).order_by('name')
+
                 else:
                     goods = Good.objects.values_list('id', 'name', 'article', 'catalog_number', 'cat1', 'cat2',
-                                                     'cat3').filter(
-                        is_good=True, cat1=_id1, cat2=_id2, cat3=_id3, name__iregex=search).order_by('name')
+                                                     'cat3').filter(is_good=True, cat1=_id1, cat2=_id2, cat3=_id3,
+                                                                    name__iregex=a).order_by('name')
                 # постраничный вывод
                 paginator = Paginator(goods, 100)
                 if 'page' in request.GET:
@@ -139,112 +154,109 @@ def good_search(request, _id1=None, _id2=None, _id3=None, search=None):
                     page_num = 1
                 page = paginator.get_page(page_num)
 
-                context = {'form': form, 'cat1': cat1, 'cat2': cat2, 'cat3': cat3, 'page': page, 'goods': page.object_list}
-
+                context = {'form': form, 'cat1': cat1, 'cat2': cat2, 'cat3': cat3, 'page': page,
+                           'goods': page.object_list, 'pa': pa}
                 return render(request, "goods/categories4.html", context)
-    # начальный вывод поиска товаров
+
+            else:
+                return redirect('catalogs')
+
+        else:
+
+            # определение наличия поиска
+            if search is None:
+                # определение пути для пагинации списка товаров
+                pa = request.path + '?'
+
+                # вывод если не выбраны категории товаров
+                if _id1 is None and _id2 is None and _id3 is None and search is None:
+                    cat1 = Good.objects.values_list('id', 'name').filter(is_good=False, cat1=0, cat2=0,
+                                                                         cat3=0).order_by('name')
+                    goods = Good.objects.values_list('id', 'name', 'article', 'catalog_number', 'cat1', 'cat2',
+                                                     'cat3').filter(is_good=True).order_by('name')
+                    # постраничный вывод
+                    paginator = Paginator(goods, 100)
+                    if 'page' in request.GET:
+                        page_num = request.GET['page']
+                    else:
+                        page_num = 1
+                    page = paginator.get_page(page_num)
+                    context = {'form': form, 'cat1': cat1, 'page': page, 'goods': page.object_list, 'pa': pa}
+                    return render(request, "goods/categories4.html", context)
+
+                # вывод при выбранном разделе 1-ого уровня
+                elif _id1 is not None and _id2 is None and _id3 is None:
+
+                    cat1 = Good.objects.values_list('id', 'name').filter(is_good=False, cat1=0, cat2=0,
+                                                                         cat3=0).order_by('name')
+                    cat2 = Good.objects.values_list('id', 'name', 'cat1').filter(is_good=False, cat1=_id1, cat2=0,
+                                                                                 cat3=0).order_by('name')
+                    goods = Good.objects.values_list('id', 'name', 'article', 'catalog_number', 'cat1', 'cat2',
+                                                     'cat3').filter(is_good=True,
+                                                                    cat1=_id1).order_by('name')
+                    # постраничный вывод
+                    paginator = Paginator(goods, 100)
+                    if 'page' in request.GET:
+                        page_num = request.GET['page']
+                    else:
+                        page_num = 1
+                    page = paginator.get_page(page_num)
+
+                    context = {'form': form, 'cat1': cat1, 'cat2': cat2, 'page': page, 'goods': page.object_list, 'pa': pa}
+                    return render(request, "goods/categories4.html", context)
+
+                # вывод при выбранном разделе 2-ого уровня
+                elif _id1 is not None and _id2 is not None and _id3 is None:
+                    cat1 = Good.objects.values_list('id', 'name').filter(is_good=False, cat1=0, cat2=0,
+                                                                         cat3=0).order_by('name')
+                    cat2 = Good.objects.values_list('id', 'name', 'cat1').filter(is_good=False, cat1=_id1, cat2=0,
+                                                                                 cat3=0).order_by(
+                        'name')
+                    cat3 = Good.objects.values_list('id', 'name', 'cat1', 'cat2').filter(is_good=False, cat1=_id1,
+                                                                                         cat2=_id2,
+                                                                                         cat3=0).order_by('name')
+                    goods = Good.objects.values_list('id', 'name', 'article', 'catalog_number', 'cat1', 'cat2',
+                                                     'cat3').filter(
+                        is_good=True, cat1=_id1, cat2=_id2).order_by('name')
+
+                    # постраничный вывод
+                    paginator = Paginator(goods, 100)
+                    if 'page' in request.GET:
+                        page_num = request.GET['page']
+                    else:
+                        page_num = 1
+                    page = paginator.get_page(page_num)
+
+                    context = {'form': form, 'cat1': cat1, 'cat2': cat2, 'cat3': cat3, 'page': page,
+                               'goods': page.object_list, "pa": pa}
+                    return render(request, "goods/categories4.html", context)
+
+                # вывод при выбранном разделе 3-его уровня
+                elif _id1 is not None and _id2 is not None and _id3 is not None:
+                    cat1 = Good.objects.values_list('id', 'name').filter(is_good=False, cat1=0, cat2=0,
+                                                                         cat3=0).order_by('name')
+                    cat2 = Good.objects.values_list('id', 'name', 'cat1').filter(is_good=False, cat1=_id1, cat2=0,
+                                                                                 cat3=0).order_by(
+                        'name')
+                    cat3 = Good.objects.values_list('id', 'name', 'cat1', 'cat2').filter(is_good=False, cat1=_id1,
+                                                                                         cat2=_id2,
+                                                                                         cat3=0).order_by('name')
+                    goods = Good.objects.values_list('id', 'name', 'article', 'catalog_number', 'cat1', 'cat2',
+                                                     'cat3').filter(is_good=True, cat1=_id1, cat2=_id2,
+                                                                    cat3=_id3).order_by('name')
+                    # постраничный вывод
+                    paginator = Paginator(goods, 100)
+                    if 'page' in request.GET:
+                        page_num = request.GET['page']
+                    else:
+                        page_num = 1
+                    page = paginator.get_page(page_num)
+
+                    context = {'form': form, 'cat1': cat1, 'cat2': cat2, 'cat3': cat3, 'page': page,
+                               'goods': page.object_list, 'pa': pa}
+                    return render(request, "goods/categories4.html", context)
+
+                else:
+                    return redirect('catalogs')
     else:
-        form = GoodsForm()
-    # начальный вывод
-    if _id1 is None and _id2 is None and _id3 is None and search is None:
-        cat1 = Good.objects.values_list('id', 'name').filter(is_good=False, cat1=0, cat2=0, cat3=0).order_by('name')
-        goods = Good.objects.values_list('id', 'name', 'article', 'catalog_number', 'cat1', 'cat2', 'cat3').filter(
-            is_good=True).order_by('name')
-
-        # постраничный вывод
-        paginator = Paginator(goods, 100)
-        if 'page' in request.GET:
-            page_num = request.GET['page']
-        else:
-            page_num = 1
-        page = paginator.get_page(page_num)
-        context = {'form': form, 'cat1': cat1, 'page': page, 'goods': page.object_list}
-        return render(request, "goods/categories4.html", context)
-    # вывод при выбранном разделе 1-ого уровня
-    elif _id1 is not None and _id2 is None and _id3 is None and search is None:
-        cat1 = Good.objects.values_list('id', 'name').filter(is_good=False, cat1=0, cat2=0, cat3=0).order_by('name')
-        cat2 = Good.objects.values_list('id', 'name', 'cat1').filter(is_good=False, cat1=_id1, cat2=0, cat3=0).order_by('name')
-        goods = Good.objects.values_list('id', 'name', 'article', 'catalog_number', 'cat1', 'cat2', 'cat3').filter(is_good=True,
-                                                    cat1=_id1).order_by('name')
-        # постраничный вывод
-        paginator = Paginator(goods, 100)
-        if 'page' in request.GET:
-            page_num = request.GET['page']
-        else:
-            page_num = 1
-        page = paginator.get_page(page_num)
-
-        context = {'form': form, 'cat1': cat1, 'cat2': cat2, 'page': page, 'goods': page.object_list}
-        return render(request, "goods/categories4.html", context)
-    # вывод при выбранном разделе 2-ого уровня
-    elif _id1 is not None and _id2 is not None and _id3 is None and search is None:
-        cat1 = Good.objects.values_list('id', 'name').filter(is_good=False, cat1=0, cat2=0, cat3=0).order_by('name')
-        cat2 = Good.objects.values_list('id', 'name', 'cat1').filter(is_good=False, cat1=_id1, cat2=0, cat3=0).order_by(
-            'name')
-        cat3 = Good.objects.values_list('id', 'name', 'cat1', 'cat2').filter(is_good=False, cat1=_id1, cat2=_id2,
-                                                                                     cat3=0).order_by('name')
-        goods = Good.objects.values_list('id', 'name', 'article', 'catalog_number', 'cat1', 'cat2', 'cat3').filter(
-            is_good=True, cat1=_id1, cat2=_id2).order_by('name')
-
-        # постраничный вывод
-        paginator = Paginator(goods, 100)
-        if 'page' in request.GET:
-            page_num = request.GET['page']
-        else:
-            page_num = 1
-        page = paginator.get_page(page_num)
-
-        context = {'form': form, 'cat1': cat1, 'cat2': cat2, 'cat3': cat3, 'page': page, 'goods': page.object_list}
-        return render(request, "goods/categories4.html", context)
-    # вывод при выбранном разделе 3-его уровня
-    elif _id1 is not None and _id2 is not None and _id3 is not None and search is None:
-        cat1 = Good.objects.values_list('id', 'name').filter(is_good=False, cat1=0, cat2=0, cat3=0).order_by('name')
-        cat2 = Good.objects.values_list('id', 'name', 'cat1').filter(is_good=False, cat1=_id1, cat2=0, cat3=0).order_by(
-            'name')
-        cat3 = Good.objects.values_list('id', 'name', 'cat1', 'cat2').filter(is_good=False, cat1=_id1, cat2=_id2,
-                                                                             cat3=0).order_by('name')
-        goods = Good.objects.values_list('id', 'name', 'article', 'catalog_number', 'cat1', 'cat2', 'cat3').filter(
-            is_good=True, cat1=_id1, cat2=_id2, cat3=_id3).order_by('name')
-
-        # постраничный вывод
-        paginator = Paginator(goods, 100)
-        if 'page' in request.GET:
-            page_num = request.GET['page']
-        else:
-            page_num = 1
-        page = paginator.get_page(page_num)
-
-        context = {'form': form, 'cat1': cat1, 'cat2': cat2, 'cat3': cat3, 'page': page, 'goods': page.object_list}
-        return render(request, "goods/categories4.html", context)
-
-    else:
-        return Http404
-
-
-def good_seek(request):
-
-    if request.method == 'POST':
-        form = GoodsForm(request.POST)
-        if form.is_valid():
-            how_to_search = form.cleaned_data['how_to_search']
-            search = form.cleaned_data['search']
-            if how_to_search:
-                #good_list = Good.objects.all().filter(is_good=True, name__contains=search).order_by('name')
-                filter = search
-                #context = {'good_list': good_list}
-                return redirect("seek/search_result", filter=filter)
-
-    else:
-        form = GoodsForm()
-
-    deps = Good.objects.values_list('id', 'name', 'cat1', 'cat2', 'cat3').filter(is_good=False).order_by('name')
-    string_num = deps.count()
-    quant = string_num / 4 + 1 if string_num % 4 != 0 else string_num / 4
-    col1 = Good.objects.values_list('id', 'name', 'cat1', 'cat2', 'cat3').filter(is_good=False).order_by('name')[0: quant]
-    col2 = Good.objects.values_list('id', 'name', 'cat1', 'cat2', 'cat3').filter(is_good=False).order_by('name')[quant + 1: quant * 2]
-    col3 = Good.objects.values_list('id', 'name', 'cat1', 'cat2', 'cat3').filter(is_good=False).order_by('name')[quant * 2 + 1: quant * 3]
-    col4 = Good.objects.values_list('id', 'name', 'cat1', 'cat2', 'cat3').filter(is_good=False).order_by('name')[quant * 3 + 1:]
-
-    context = {'form': form, 'col1': col1, 'col2': col2, 'col3': col3, 'col4': col4}
-
-    return render(request, "goods/categories3.html", context)
+        return redirect('catalogs')
