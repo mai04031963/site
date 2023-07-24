@@ -6,4 +6,5 @@ p#cat {position: relative; left: 40px}
 .categories2 {left: 100px; top: 100px; list-style-type: none; width: 250px}
 .pagination {position: absolute; left: 450px; top: 130px}
 .good {position: absolute; left: 400px; top: 150px; list-style-type: none}
+.aside{position: absolute; left: 1000px; top: 150px;}
 li#g {margin-bottom: 1em; width: 500px}
